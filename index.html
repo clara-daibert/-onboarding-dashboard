@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Onboarding · Educbank</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --surface2: #f0efe9;
+    --border: rgba(0,0,0,0.09);
+    --text: #1a1a18;
+    --text2: #5f5e5a;
+    --text3: #888780;
+    --blue: #185FA5;
+    --green: #0F6E56;
+    --amber: #BA7517;
+    --red: #A32D2D;
+    --teal: #1D9E75;
+    --gray: #888780;
+    --blue-bg: #E6F1FB;
+    --blue-text: #0C447C;
+    --green-bg: #EAF3DE;
+    --green-text: #3B6D11;
+    --amber-bg: #FAEEDA;
+    --amber-text: #854F0B;
+    --red-bg: #FCEBEB;
+    --red-text: #A32D2D;
+    --info-bg: #E6F1FB;
+    --info-text: #0C447C;
+    --warn-bg: #FAEEDA;
+    --warn-text: #854F0B;
+    --success-bg: #EAF3DE;
+    --success-text: #3B6D11;
+    --danger-bg: #FCEBEB;
+    --danger-text: #A32D2D;
+    --radius: 8px;
+    --radius-lg: 12px;
+    --grid: rgba(0,0,0,0.06);
+    --tick: #888;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141413;
+      --surface: #1e1e1c;
+      --surface2: #252523;
+      --border: rgba(255,255,255,0.09);
+      --text: #e8e7e2;
+      --text2: #aaa9a3;
+      --text3: #666460;
+      --blue-bg: #0c2d4a;
+      --blue-text: #85B7EB;
+      --green-bg: #0d2e22;
+      --green-text: #5DCAA5;
+      --amber-bg: #3a2508;
+      --amber-text: #FAC775;
+      --red-bg: #2e1010;
+      --red-text: #F09595;
+      --info-bg: #0c2d4a; --info-text: #85B7EB;
+      --warn-bg: #3a2508; --warn-text: #FAC775;
+      --success-bg: #0d2e22; --success-text: #5DCAA5;
+      --danger-bg: #2e1010; --danger-text: #F09595;
+      --grid: rgba(255,255,255,0.07);
+      --tick: #777;
+    }
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .topbar {
+    background: var(--surface);
+    border-bottom: 0.5px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-mark {
+    width: 28px; height: 28px; border-radius: 6px;
+    background: var(--blue); display: flex; align-items: center;
+    justify-content: center; font-size: 13px; font-weight: 600; color: #fff;
+  }
+  .logo-text { font-size: 14px; font-weight: 500; color: var(--text); }
+  .logo-sub { font-size: 11px; color: var(--text3); }
+  .topbar-right { display: flex; align-items: center; gap: 8px; }
+  .last-update { font-size: 11px; color: var(--text3); }
+  .source-pill {
+    font-size: 10px; padding: 3px 9px; border-radius: 10px;
+    background: var(--success-bg); color: var(--success-text);
+    font-weight: 500;
+  }
+  .tabs {
+    display: flex; gap: 2px;
+    background: var(--surface2); border-radius: var(--radius);
+    padding: 3px;
+  }
+  .tab {
+    padding: 5px 16px; border-radius: 6px; border: none;
+    background: transparent; color: var(--text2); font-size: 13px;
+    cursor: pointer; font-family: inherit; font-weight: 500;
+    transition: background .15s, color .15s;
+  }
+  .tab.active { background: var(--surface); color: var(--text); }
+  .main { max-width: 1100px; margin: 0 auto; padding: 1.5rem 2rem 4rem; }
+  .section-label {
+    font-size: 10px; font-weight: 500; color: var(--text3);
+    text-transform: uppercase; letter-spacing: .08em; margin-bottom: .75rem;
+  }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1.25rem; }
+  .kpi {
+    background: var(--surface2); border-radius: var(--radius);
+    padding: .875rem 1rem;
+  }
+  .kpi-label { font-size: 11px; color: var(--text2); margin-bottom: 4px; }
+  .kpi-val { font-size: 28px; font-weight: 500; color: var(--text); line-height: 1; }
+  .kpi-sub { font-size: 11px; color: var(--text3); margin-top: 3px; }
+  .badge {
+    display: inline-block; font-size: 10px; font-weight: 500;
+    padding: 2px 8px; border-radius: 4px; margin-top: 6px;
+  }
+  .b-info    { background: var(--info-bg);    color: var(--info-text); }
+  .b-success { background: var(--success-bg); color: var(--success-text); }
+  .b-warn    { background: var(--warn-bg);    color: var(--warn-text); }
+  .b-danger  { background: var(--danger-bg);  color: var(--danger-text); }
+  .charts-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.25rem; }
+  .charts-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 1.25rem; }
+  .card {
+    background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg); padding: 1.125rem 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+  .card-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 12px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
+  .leg { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text2); }
+  .leg-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+  .chart-wrap { position: relative; width: 100%; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th {
+    font-size: 11px; font-weight: 500; color: var(--text2);
+    text-align: left; padding: 6px 8px;
+    border-bottom: 0.5px solid var(--border);
+  }
+  td { padding: 7px 8px; border-bottom: 0.5px solid var(--border); color: var(--text); }
+  tr:last-child td { border-bottom: none; }
+  .pill {
+    display: inline-flex; align-items: center; font-size: 10px;
+    padding: 2px 7px; border-radius: 10px;
+  }
+  .sla-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .sla-card {
+    text-align: center; padding: 1.25rem 1rem;
+    background: var(--surface2); border-radius: var(--radius);
+  }
+  .sla-num { font-size: 32px; font-weight: 500; line-height: 1; margin: 8px 0 4px; }
+  .sla-label { font-size: 11px; color: var(--text2); margin-bottom: 4px; }
+  .sla-sub { font-size: 11px; color: var(--text3); }
+  .bar-bg {
+    flex: 1; height: 6px; background: var(--surface2);
+    border-radius: 3px; overflow: hidden;
+  }
+  .bar-fill { height: 100%; background: var(--blue); border-radius: 3px; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  footer {
+    text-align: center; font-size: 11px; color: var(--text3);
+    padding: 2rem 0 1rem;
+    border-top: 0.5px solid var(--border);
+    margin-top: 2rem;
+  }
+  @media (max-width: 768px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .charts-2, .charts-3, .sla-cards { grid-template-columns: 1fr; }
+    .main { padding: 1rem; }
+    .topbar { padding: 0 1rem; }
+    .tabs .tab { padding: 5px 10px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">
+    <div class="logo-mark">E</div>
+    <div>
+      <div class="logo-text">Dashboard de Onboarding</div>
+      <div class="logo-sub">educ_one_ouro · clientes · obt_escolas_onboarding</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <span class="last-update">Referência: junho 2026</span>
+    <span class="source-pill">Dados Databricks T+1</span>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('exec', this)">Executivo</button>
+      <button class="tab" onclick="switchTab('ops', this)">Operacional</button>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- ─── PAINEL EXECUTIVO ─────────────────────────────────────── -->
+  <div id="panel-exec" class="panel active">
+
+    <p class="section-label">KPIs executivos — snapshot junho 2026</p>
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-label">Implantação ativa</div>
+        <div class="kpi-val">41</div>
+        <div class="kpi-sub">escolas em onboarding agora</div>
+        <span class="badge b-info">Fase de Implantação</span>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Fase de Adoção</div>
+        <div class="kpi-val">70</div>
+        <div class="kpi-sub">em treinamento / consolidação</div>
+        <span class="badge b-warn">Adoção em curso</span>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Integração concluída</div>
+        <div class="kpi-val">811</div>
+        <div class="kpi-sub">escolas com onboarding completo</div>
+        <span class="badge b-success">Base ativa</span>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Churn no período</div>
+        <div class="kpi-val">13</div>
+        <div class="kpi-sub">saíram antes de concluir</div>
+        <span class="badge b-danger">Taxa: 1,4%</span>
+      </div>
+    </div>
+
+    <div class="charts-2">
+      <div class="card">
+        <div class="card-title">Distribuição por fase — junho 2026</div>
+        <div class="legend">
+          <span class="leg"><span class="leg-dot" style="background:#185FA5"></span>Integração Concluída (88%)</span>
+          <span class="leg"><span class="leg-dot" style="background:#0F6E56"></span>Fase de Adoção (8%)</span>
+          <span class="leg"><span class="leg-dot" style="background:#BA7517"></span>Fase de Implantação (4%)</span>
+          <span class="leg"><span class="leg-dot" style="background:#A32D2D"></span>Churn (1%)</span>
+        </div>
+        <div class="chart-wrap" style="height:220px">
+          <canvas id="c1" role="img" aria-label="Donut: 811 Integração Concluída, 70 Adoção, 41 Implantação, 13 Churn">811 concluídas, 70 adoção, 41 implantação, 13 churn.</canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Escolas ativas por método — junho 2026</div>
+        <div class="legend">
+          <span class="leg"><span class="leg-dot" style="background:#185FA5"></span>Educbank/Plataforma (47%)</span>
+          <span class="leg"><span class="leg-dot" style="background:#0F6E56"></span>API (34%)</span>
+          <span class="leg"><span class="leg-dot" style="background:#BA7517"></span>R&R (20%)</span>
+        </div>
+        <div class="chart-wrap" style="height:220px">
+          <canvas id="c2" role="img" aria-label="Pizza: 424 Educbank, 312 API, 181 R&R">424 Educbank, 312 API, 181 R&R.</canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">SLA médio de onboarding por método — últimos 12 meses (dias)</div>
+      <div class="legend">
+        <span class="leg"><span class="leg-dot" style="background:#185FA5"></span>Educbank</span>
+        <span class="leg"><span class="leg-dot" style="background:#0F6E56;border:1px dashed #0F6E56;background:transparent"></span>API</span>
+        <span class="leg"><span class="leg-dot" style="background:#BA7517;border:1px dotted #BA7517;background:transparent"></span>R&R</span>
+      </div>
+      <div class="chart-wrap" style="height:240px">
+        <canvas id="c3" role="img" aria-label="Linha mostrando queda do SLA médio de onboarding por método de jun/25 a jun/26">SLA caiu de ~937 para 723 dias (Educbank), de 916 para 786 (API) e de 993 para 780 (R&R).</canvas>
+      </div>
+    </div>
+
+    <div class="charts-2">
+      <div class="card">
+        <div class="card-title">Evolução das fases — últimos 12 meses</div>
+        <div class="legend">
+          <span class="leg"><span class="leg-dot" style="background:#185FA5"></span>Integração Concluída</span>
+          <span class="leg"><span class="leg-dot" style="background:#BA7517"></span>Fase de Implantação</span>
+          <span class="leg"><span class="leg-dot" style="background:#0F6E56"></span>Fase de Adoção</span>
+        </div>
+        <div class="chart-wrap" style="height:220px">
+          <canvas id="c4" role="img" aria-label="Barras empilhadas de escolas por fase de jun/25 a jun/26">Base concluída cresceu de 640 para 811.</canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Status ativo detalhado — Implantação + Adoção</div>
+        <div class="chart-wrap" style="height:220px">
+          <canvas id="c5" role="img" aria-label="Barras horizontais com volume por etapa ativa">Agendar Treinamento lidera com 27 escolas.</canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">SLA médio atual por método — junho 2026</div>
+      <div class="sla-cards">
+        <div class="sla-card">
+          <div class="sla-label">Educbank / Plataforma</div>
+          <div class="sla-num" style="color:#185FA5">723</div>
+          <div class="sla-sub">dias em média</div>
+          <span class="badge b-success" style="margin-top:8px">Mais rápido</span>
+        </div>
+        <div class="sla-card">
+          <div class="sla-label">API Integração</div>
+          <div class="sla-num" style="color:#0F6E56">786</div>
+          <div class="sla-sub">dias em média</div>
+          <span class="badge b-info" style="margin-top:8px">Intermediário</span>
+        </div>
+        <div class="sla-card">
+          <div class="sla-label">Remessa e Retorno</div>
+          <div class="sla-num" style="color:#BA7517">780</div>
+          <div class="sla-sub">dias em média</div>
+          <span class="badge b-warn" style="margin-top:8px">Atenção</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ─── PAINEL OPERACIONAL ────────────────────────────────────── -->
+  <div id="panel-ops" class="panel">
+
+    <p class="section-label">Visão operacional — implantação ativa em junho 2026</p>
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-label">Implantação — API</div>
+        <div class="kpi-val">20</div>
+        <div class="kpi-sub">escolas em andamento</div>
+        <span class="badge b-info">49% do total</span>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Implantação — Plataforma</div>
+        <div class="kpi-val">12</div>
+        <div class="kpi-sub">escolas em andamento</div>
+        <span class="badge b-success">29% do total</span>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Implantação — R&R</div>
+        <div class="kpi-val">6</div>
+        <div class="kpi-sub">escolas em andamento</div>
+        <span class="badge b-warn">15% do total</span>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Agendar Treinamento</div>
+        <div class="kpi-val">27</div>
+        <div class="kpi-sub">maior etapa em aberto</div>
+        <span class="badge b-danger">Gargalo</span>
+      </div>
+    </div>
+
+    <div class="charts-2">
+      <div class="card">
+        <div class="card-title">Carga por CS responsável — Fase de Implantação</div>
+        <div class="chart-wrap" style="height:240px">
+          <canvas id="c6" role="img" aria-label="Barras com escolas em implantação por CS">Monise Levorato lidera com 4 escolas.</canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Implantação ativa por método</div>
+        <div class="legend">
+          <span class="leg"><span class="leg-dot" style="background:#185FA5"></span>API (49%)</span>
+          <span class="leg"><span class="leg-dot" style="background:#0F6E56"></span>Plataforma (29%)</span>
+          <span class="leg"><span class="leg-dot" style="background:#BA7517"></span>R&R (15%)</span>
+          <span class="leg"><span class="leg-dot" style="background:#888780"></span>Não ident. (7%)</span>
+        </div>
+        <div class="chart-wrap" style="height:240px">
+          <canvas id="c7" role="img" aria-label="Donut: 20 API, 12 Plataforma, 6 R&R">20 API, 12 Plataforma, 6 R&R.</canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Status detalhado — Implantação e Adoção (jun/26)</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Status / Etapa</th>
+            <th>Fase</th>
+            <th style="text-align:right">Escolas</th>
+            <th>Situação</th>
+          </tr>
+        </thead>
+        <tbody id="status-tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">CS responsável — carga em Fase de Implantação (jun/26)</div>
+      <table>
+        <thead>
+          <tr>
+            <th>CS Responsável</th>
+            <th style="text-align:right">Escolas</th>
+            <th>Carga relativa</th>
+          </tr>
+        </thead>
+        <tbody id="cs-tbody"></tbody>
+      </table>
+    </div>
+
+  </div>
+
+</main>
+
+<footer>
+  Fonte: <strong>educ_one_ouro.clientes.obt_escolas_onboarding</strong> · Databricks · T+1 · Referência junho 2026
+</footer>
+
+<script>
+const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
+const GRID  = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+const TICK  = isDark ? '#888' : '#666';
+const BLUE  = '#185FA5', GREEN = '#0F6E56', AMBER = '#BA7517';
+const RED   = '#A32D2D', TEAL  = '#1D9E75', GRAY  = '#888780';
+const BORD  = isDark ? '#141413' : '#ffffff';
+
+function switchTab(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+/* ── C1 — Donut fases ── */
+new Chart(document.getElementById('c1'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Integração Concluída','Fase de Adoção','Fase de Implantação','Churn'],
+    datasets: [{ data: [811,70,41,13], backgroundColor:[BLUE,GREEN,AMBER,RED], borderColor:BORD, borderWidth:2 }]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false, cutout:'65%',
+    plugins:{ legend:{display:false}, tooltip:{callbacks:{label: i=>' '+i.label+': '+i.raw}} }
+  }
+});
+
+/* ── C2 — Pizza método ── */
+new Chart(document.getElementById('c2'), {
+  type: 'pie',
+  data: {
+    labels: ['Educbank/Plataforma','API Integração','Remessa e Retorno'],
+    datasets: [{ data:[424,312,181], backgroundColor:[BLUE,GREEN,AMBER], borderColor:BORD, borderWidth:2 }]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{display:false}, tooltip:{callbacks:{label: i=>' '+i.label+': '+i.raw+' escolas'}} }
+  }
+});
+
+/* ── C3 — Linha SLA 12 meses ── */
+const months = ['Jun/25','Jul/25','Ago/25','Set/25','Out/25','Nov/25','Dez/25','Jan/26','Fev/26','Mar/26','Abr/26','Mai/26','Jun/26'];
+new Chart(document.getElementById('c3'), {
+  type: 'line',
+  data: {
+    labels: months,
+    datasets: [
+      { label:'Educbank', data:[937.2,920.7,896.9,878.4,833.3,802.0,787.2,779.6,770.6,761.4,733.8,722.9,722.9], borderColor:BLUE, backgroundColor:'transparent', borderWidth:2, pointRadius:3, tension:.3 },
+      { label:'API',      data:[916.1,909.0,898.5,867.8,836.2,826.8,811.6,808.5,799.4,799.4,799.4,786.2,786.2], borderColor:GREEN, backgroundColor:'transparent', borderWidth:2, pointRadius:3, tension:.3, borderDash:[5,3] },
+      { label:'R&R',      data:[993.1,957.3,936.8,909.6,877.9,859.1,840.4,807.2,801.8,785.3,779.9,779.9,779.9], borderColor:AMBER, backgroundColor:'transparent', borderWidth:2, pointRadius:3, tension:.3, borderDash:[2,2] }
+    ]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{display:false}, tooltip:{callbacks:{label: i=>i.dataset.label+': '+Math.round(i.raw)+' dias'}} },
+    scales:{
+      x:{ ticks:{color:TICK,font:{size:10},autoSkip:false,maxRotation:45}, grid:{color:GRID} },
+      y:{ min:680, max:1020, ticks:{color:TICK,font:{size:10},callback:v=>v+' d'}, grid:{color:GRID} }
+    }
+  }
+});
+
+/* ── C4 — Barras empilhadas fases ── */
+new Chart(document.getElementById('c4'), {
+  type: 'bar',
+  data: {
+    labels: months,
+    datasets: [
+      { label:'Integração Concluída', data:[640,646,646,646,648,658,668,668,687,746,787,811,811], backgroundColor:BLUE+'bb', stack:'s' },
+      { label:'Fase de Implantação',  data:[81,72,70,76,78,81,90,98,63,51,57,55,41],              backgroundColor:AMBER+'bb', stack:'s' },
+      { label:'Fase de Adoção',       data:[22,39,57,72,104,113,110,113,138,99,68,56,70],          backgroundColor:GREEN+'bb', stack:'s' }
+    ]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{display:false}, tooltip:{mode:'index'} },
+    scales:{
+      x:{ stacked:true, ticks:{color:TICK,font:{size:9},autoSkip:false,maxRotation:45}, grid:{display:false} },
+      y:{ stacked:true, ticks:{color:TICK,font:{size:10}}, grid:{color:GRID} }
+    }
+  }
+});
+
+/* ── C5 — Barras horizontais status ativo ── */
+const statusItems = [
+  {s:'Agendar Treinamento (Adoção)',n:27,c:GREEN},
+  {s:'Geração de token / ERP (API)',n:11,c:BLUE},
+  {s:'Concluído (Plataforma)',n:15,c:TEAL},
+  {s:'Encerramento e Handover',n:6,c:GREEN},
+  {s:'Primeiros Passos (Adoção)',n:6,c:GREEN},
+  {s:'Concluído (API)',n:5,c:TEAL},
+  {s:'Concluído (R&R)',n:5,c:TEAL},
+  {s:'Consolidação (Adoção)',n:3,c:GREEN},
+  {s:'Criação ambiente plataforma',n:2,c:BLUE},
+  {s:'Treinamento (Adoção)',n:2,c:GREEN},
+];
+new Chart(document.getElementById('c5'), {
+  type: 'bar',
+  data: {
+    labels: statusItems.map(d=>d.s),
+    datasets: [{ data:statusItems.map(d=>d.n), backgroundColor:statusItems.map(d=>d.c), borderWidth:0 }]
+  },
+  options: {
+    indexAxis:'y', responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{display:false}, tooltip:{callbacks:{label:i=>' '+i.raw+' escolas'}} },
+    scales:{
+      x:{ ticks:{color:TICK,font:{size:10}}, grid:{color:GRID} },
+      y:{ ticks:{color:TICK,font:{size:10}}, grid:{display:false} }
+    }
+  }
+});
+
+/* ── C6 — Carga CS ── */
+const csItems = [
+  {n:'Monise Levorato',v:4},{n:'Carlos Junior',v:3},{n:'Vinicius Bernardes',v:2},
+  {n:'Frederico Facco',v:2},{n:'Daniel Venancio',v:2},{n:'Isadora Bocalari',v:1},{n:'Marcelo Vieira',v:1}
+];
+new Chart(document.getElementById('c6'), {
+  type: 'bar',
+  data: {
+    labels: csItems.map(d=>d.n),
+    datasets:[{ data:csItems.map(d=>d.v), backgroundColor:csItems.map(d=>d.v>=4?RED:d.v>=3?AMBER:BLUE), borderWidth:0 }]
+  },
+  options: {
+    indexAxis:'y', responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{display:false}, tooltip:{callbacks:{label:i=>' '+i.raw+' escolas'}} },
+    scales:{
+      x:{ ticks:{color:TICK,font:{size:10},stepSize:1}, grid:{color:GRID} },
+      y:{ ticks:{color:TICK,font:{size:10}}, grid:{display:false} }
+    }
+  }
+});
+
+/* ── C7 — Donut implantação por método ── */
+new Chart(document.getElementById('c7'), {
+  type: 'doughnut',
+  data: {
+    labels:['API','Plataforma','R&R','Não ident.'],
+    datasets:[{ data:[20,12,6,3], backgroundColor:[BLUE,GREEN,AMBER,GRAY], borderColor:BORD, borderWidth:2 }]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false, cutout:'60%',
+    plugins:{ legend:{display:false}, tooltip:{callbacks:{label:i=>' '+i.label+': '+i.raw+' escolas'}} }
+  }
+});
+
+/* ── Tabela status detalhado ── */
+const statusRows = [
+  {s:'Agendar Treinamento (Adoção)',         f:'Adoção',      n:27, sit:'warn',    txt:'Gargalo'},
+  {s:'Geração de token e envio ao ERP (API)',f:'Implantação', n:11, sit:'info',    txt:'Em andamento'},
+  {s:'Concluído (Plataforma)',               f:'Concluído',   n:15, sit:'success', txt:'Concluído'},
+  {s:'Encerramento e Handover (Adoção)',     f:'Adoção',      n:6,  sit:'info',    txt:'Quase concluído'},
+  {s:'Primeiros Passos (Adoção)',            f:'Adoção',      n:6,  sit:'info',    txt:'Início'},
+  {s:'Concluído (API)',                      f:'Concluído',   n:5,  sit:'success', txt:'Concluído'},
+  {s:'Concluído (R&R)',                      f:'Concluído',   n:5,  sit:'success', txt:'Concluído'},
+  {s:'Churn (Plataforma)',                   f:'Churn',       n:5,  sit:'danger',  txt:'Churn'},
+  {s:'Churn (R&R)',                          f:'Churn',       n:4,  sit:'danger',  txt:'Churn'},
+  {s:'Churn (Adoção)',                       f:'Churn',       n:3,  sit:'danger',  txt:'Churn'},
+  {s:'Consolidação (Adoção)',                f:'Adoção',      n:3,  sit:'info',    txt:'Em andamento'},
+  {s:'Criação ambiente plataforma (API)',    f:'Implantação', n:2,  sit:'info',    txt:'Em andamento'},
+  {s:'Treinamento (Adoção)',                 f:'Adoção',      n:2,  sit:'info',    txt:'Em andamento'},
+  {s:'Adoção concluída',                     f:'Concluído',   n:1,  sit:'success', txt:'Concluído'},
+  {s:'Migração de dados Parte I',            f:'Implantação', n:1,  sit:'info',    txt:'Em andamento'},
+  {s:'Churn (API)',                          f:'Churn',       n:1,  sit:'danger',  txt:'Churn'},
+];
+const stb = document.getElementById('status-tbody');
+statusRows.forEach(r => {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td>${r.s}</td><td><span class="pill b-${r.sit}">${r.f}</span></td><td style="text-align:right;font-weight:500">${r.n}</td><td><span class="badge b-${r.sit}">${r.txt}</span></td>`;
+  stb.appendChild(tr);
+});
+
+/* ── Tabela CS ── */
+const ctb = document.getElementById('cs-tbody');
+const maxCS = Math.max(...csItems.map(c=>c.v));
+csItems.forEach(cs => {
+  const pct = Math.round(cs.v / maxCS * 100);
+  const sit = cs.v >= 4 ? 'danger' : cs.v >= 3 ? 'warn' : 'info';
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td>${cs.n}</td>
+    <td style="text-align:right;font-weight:500">${cs.v}</td>
+    <td>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div>
+        <span class="badge b-${sit}" style="margin-top:0;white-space:nowrap">${cs.v} escola${cs.v>1?'s':''}</span>
+      </div>
+    </td>`;
+  ctb.appendChild(tr);
+});
+</script>
+</body>
+</html>
