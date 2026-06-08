@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Onboarding · Educbank</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  --bg:#f5f4f0; --surface:#ffffff; --surface2:#f0efe9;
+  --border:rgba(0,0,0,0.09); --text:#1a1a18; --text2:#5f5e5a; --text3:#888780;
+  --blue:#185FA5; --green:#0F6E56; --amber:#BA7517; --red:#A32D2D; --gray:#888780;
+  --info-bg:#E6F1FB; --info-text:#0C447C;
+  --success-bg:#EAF3DE; --success-text:#3B6D11;
+  --warn-bg:#FAEEDA; --warn-text:#854F0B;
+  --danger-bg:#FCEBEB; --danger-text:#A32D2D;
+  --radius:8px; --radius-lg:12px;
+  --grid:rgba(0,0,0,0.06); --tick:#777;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#141413; --surface:#1e1e1c; --surface2:#252523;
+    --border:rgba(255,255,255,0.09); --text:#e8e7e2; --text2:#aaa9a3; --text3:#666460;
+    --info-bg:#0c2d4a; --info-text:#85B7EB;
+    --success-bg:#0d2e22; --success-text:#5DCAA5;
+    --warn-bg:#3a2508; --warn-text:#FAC775;
+    --danger-bg:#2e1010; --danger-text:#F09595;
+    --grid:rgba(255,255,255,0.07); --tick:#888;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+.topbar{background:var(--surface);border-bottom:0.5px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:10}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-mark{width:28px;height:28px;border-radius:6px;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff}
+.logo-name{font-size:14px;font-weight:500}
+.logo-sub{font-size:11px;color:var(--text3)}
+.source-pill{font-size:10px;padding:3px 9px;border-radius:10px;background:var(--success-bg);color:var(--success-text);font-weight:500}
+.tabs{display:flex;gap:2px;background:var(--surface2);border-radius:var(--radius);padding:3px}
+.tab{padding:5px 16px;border-radius:6px;border:none;background:transparent;color:var(--text2);font-size:12px;cursor:pointer;font-family:inherit;font-weight:500;transition:background .15s,color .15s}
+.tab.active{background:var(--surface);color:var(--text)}
+.main{max-width:1100px;margin:0 auto;padding:1.5rem 2rem 4rem}
+.panel{display:none}.panel.active{display:block}
+.sec-label{font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem;margin-top:1.5rem}
+.sec-label:first-child{margin-top:0}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem}
+.kpi{background:var(--surface2);border-radius:var(--radius);padding:.875rem 1rem}
+.kpi-label{font-size:11px;color:var(--text2);margin-bottom:4px}
+.kpi-val{font-size:26px;font-weight:500;color:var(--text);line-height:1}
+.kpi-sub{font-size:11px;color:var(--text3);margin-top:3px}
+.badge{display:inline-block;font-size:10px;font-weight:500;padding:2px 8px;border-radius:4px;margin-top:6px}
+.b-info{background:var(--info-bg);color:var(--info-text)}
+.b-success{background:var(--success-bg);color:var(--success-text)}
+.b-warn{background:var(--warn-bg);color:var(--warn-text)}
+.b-danger{background:var(--danger-bg);color:var(--danger-text)}
+.b-gray{background:var(--surface2);color:var(--text2);border:0.5px solid var(--border)}
+.charts-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.25rem}
+.charts-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:1.25rem}
+.card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:1.125rem 1.25rem;margin-bottom:1.25rem}
+.card-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px}
+.card-sub{font-size:11px;color:var(--text3);margin-bottom:12px}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px}
+.leg{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)}
+.leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.chart-wrap{position:relative;width:100%}
+.sla-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.sla-card{text-align:center;padding:1rem;background:var(--surface2);border-radius:var(--radius)}
+.sla-card.highlight{background:var(--surface);border:0.5px solid var(--border)}
+.sla-num{font-size:30px;font-weight:500;line-height:1;margin:6px 0 3px}
+.sla-label{font-size:11px;color:var(--text2);margin-bottom:2px}
+.sla-sub{font-size:10px;color:var(--text3)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{font-size:11px;font-weight:500;color:var(--text2);text-align:left;padding:6px 8px;border-bottom:0.5px solid var(--border)}
+td{padding:7px 8px;border-bottom:0.5px solid var(--border);color:var(--text);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.pill{display:inline-flex;align-items:center;font-size:10px;padding:2px 8px;border-radius:10px}
+.dias-badge{display:inline-block;font-size:11px;font-weight:500;padding:2px 8px;border-radius:4px;text-align:center}
+.alert-box{background:var(--warn-bg);border:0.5px solid var(--amber);border-radius:var(--radius);padding:.75rem 1rem;font-size:12px;color:var(--warn-text);margin-bottom:1.25rem;display:flex;gap:8px;align-items:flex-start}
+.bar-bg{flex:1;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px}
+footer{text-align:center;font-size:11px;color:var(--text3);padding:2rem 0 1rem;border-top:0.5px solid var(--border);margin-top:2rem}
+@media(max-width:768px){
+  .kpi-grid,.charts-2,.charts-3,.sla-grid{grid-template-columns:repeat(2,1fr)}
+  .main{padding:1rem}.topbar{padding:0 1rem;flex-wrap:wrap;height:auto;gap:8px;padding:8px 1rem}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">
+    <div class="logo-mark">E</div>
+    <div>
+      <div class="logo-name">Onboarding · Capacidade Operacional</div>
+      <div class="logo-sub">educ_one_ouro · clientes · obt_escolas_onboarding · referência jun/2026</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <span class="source-pill">Databricks T+1</span>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('exec',this)">Executivo</button>
+      <button class="tab" onclick="switchTab('ops',this)">Operacional</button>
+      <button class="tab" onclick="switchTab('ritmo',this)">Ritmo comercial</button>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+
+<!-- ═══════════════════════════════════════════════════
+     PAINEL EXECUTIVO
+═══════════════════════════════════════════════════ -->
+<div id="panel-exec" class="panel active">
+
+  <p class="sec-label">Snapshot operacional — junho 2026</p>
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">Em implantação ativa</div>
+      <div class="kpi-val">14</div>
+      <div class="kpi-sub">escolas genuinamente em processo</div>
+      <span class="badge b-info">Fase de Implantação</span>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Fase de Adoção</div>
+      <div class="kpi-val">70</div>
+      <div class="kpi-sub">pós-implantação, em treinamento</div>
+      <span class="badge b-warn">Adoção em curso</span>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Integração concluída</div>
+      <div class="kpi-val">811</div>
+      <div class="kpi-sub">escolas operando na plataforma</div>
+      <span class="badge b-success">Base ativa</span>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Base analisada (Won→repasse)</div>
+      <div class="kpi-val">726</div>
+      <div class="kpi-sub">escolas com dados completos</div>
+      <span class="badge b-gray">Histórico confiável</span>
+    </div>
+  </div>
+
+  <p class="sec-label">Tempo real de implantação — Won → primeiro repasse (dias)</p>
+  <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Calculado como <code>DATEDIFF(primeira_boletagem_plataforma, data_fechamento_contrato)</code> · 726 escolas com ambas as datas preenchidas · exclui o campo <code>sla_onboarding_dias</code> que mede tempo de vida do contrato</p>
+
+  <div class="sla-grid" style="margin-bottom:1.25rem">
+    <div class="sla-card">
+      <div class="sla-label">Plataforma (Educbank)</div>
+      <div class="sla-num" style="color:var(--blue)">44</div>
+      <div class="sla-sub">dias — média</div>
+      <div class="sla-sub">mediana 38 · mín 6 · máx 199</div>
+      <span class="badge b-success" style="margin-top:6px">374 escolas</span>
+    </div>
+    <div class="sla-card">
+      <div class="sla-label">API Integração</div>
+      <div class="sla-num" style="color:var(--green)">45</div>
+      <div class="sla-sub">dias — média</div>
+      <div class="sla-sub">mediana 36 · mín 4 · máx 596</div>
+      <span class="badge b-warn" style="margin-top:6px">221 escolas · outliers até 596d</span>
+    </div>
+    <div class="sla-card">
+      <div class="sla-label">Remessa e Retorno</div>
+      <div class="sla-num" style="color:var(--amber)">49</div>
+      <div class="sla-sub">dias — média</div>
+      <div class="sla-sub">mediana 39 · mín 1 · máx 311</div>
+      <span class="badge b-info" style="margin-top:6px">131 escolas</span>
+    </div>
+    <div class="sla-card highlight">
+      <div class="sla-label">Média geral (3 esteiras)</div>
+      <div class="sla-num" style="color:var(--text)">45</div>
+      <div class="sla-sub">dias — média</div>
+      <div class="sla-sub">mediana 38 · 726 escolas</div>
+      <span class="badge b-gray" style="margin-top:6px">Referência operacional</span>
+    </div>
+  </div>
+
+  <div class="charts-2">
+    <div class="card">
+      <div class="card-title">Média vs mediana por esteira</div>
+      <div class="card-sub">Média puxada por outliers — mediana é o indicador mais representativo</div>
+      <div class="legend">
+        <span class="leg"><span class="leg-dot" style="background:#185FA5"></span>Média</span>
+        <span class="leg"><span class="leg-dot" style="background:#185FA555"></span>Mediana</span>
+      </div>
+      <div class="chart-wrap" style="height:200px">
+        <canvas id="c-sla-bar" role="img" aria-label="Barras agrupadas de média e mediana de dias Won até primeiro repasse por esteira">Plataforma: média 44, mediana 38. API: média 45, mediana 36. R&R: média 49, mediana 39.</canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Distribuição atual das fases — jun/2026</div>
+      <div class="card-sub">14 implantações ativas após excluir churns e concluídos classificados incorretamente</div>
+      <div class="legend">
+        <span class="leg"><span class="leg-dot" style="background:#185FA5"></span>Integração Concluída</span>
+        <span class="leg"><span class="leg-dot" style="background:#0F6E56"></span>Fase de Adoção</span>
+        <span class="leg"><span class="leg-dot" style="background:#BA7517"></span>Implantação ativa</span>
+        <span class="leg"><span class="leg-dot" style="background:#A32D2D"></span>Churn</span>
+      </div>
+      <div class="chart-wrap" style="height:200px">
+        <canvas id="c-fases" role="img" aria-label="Donut: 811 concluídas, 70 adoção, 14 implantação, 13 churn">811 concluídas, 70 adoção, 14 implantação, 13 churn.</canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert-box">
+    ⚠ <div><strong>Campo "Data de início da operação" ainda não disponível na camada ouro.</strong> Assim que o time de dados incluir esse campo no pipeline ETL, o dashboard será atualizado para mostrar Won → data prevista pelo comercial vs. data real do primeiro repasse, habilitando o check de aderência.</div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PAINEL OPERACIONAL
+═══════════════════════════════════════════════════ -->
+<div id="panel-ops" class="panel">
+
+  <p class="sec-label">Implantações ativas em junho 2026 — 14 escolas genuínas</p>
+  <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Filtro: <code>fase = 'Fase de Implantação'</code> excluindo <code>status_onboarding</code> com Churn ou Concluído · dias = DATEDIFF(hoje, data_fechamento_contrato)</p>
+
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">Esteira Plataforma</div>
+      <div class="kpi-val">1</div>
+      <div class="kpi-sub">escola em implantação ativa</div>
+      <span class="badge b-info">7% do total</span>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Esteira API</div>
+      <div class="kpi-val">13</div>
+      <div class="kpi-sub">escolas em implantação ativa</div>
+      <span class="badge b-warn">93% do total</span>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Esteira R&R</div>
+      <div class="kpi-val">0</div>
+      <div class="kpi-sub">nenhuma ativa no momento</div>
+      <span class="badge b-gray">—</span>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Sem data de Won</div>
+      <div class="kpi-val">10</div>
+      <div class="kpi-sub">registros com dados incompletos</div>
+      <span class="badge b-danger">Qualidade de dados</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Lista completa — implantações ativas (jun/2026)</div>
+    <div class="card-sub">Ordenado por data de Won mais recente · dias calculados a partir de data_fechamento_contrato</div>
+    <div style="overflow-x:auto">
+    <table id="tb-ativas">
+      <thead>
+        <tr>
+          <th>Escola</th>
+          <th>Esteira</th>
+          <th>Won (fechamento)</th>
+          <th>Início onboarding</th>
+          <th>Dias desde Won</th>
+          <th>Etapa atual</th>
+          <th>CS responsável</th>
+          <th>Situação</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    </div>
+  </div>
+
+  <div class="charts-2">
+    <div class="card">
+      <div class="card-title">Distribuição por esteira — implantações ativas</div>
+      <div class="chart-wrap" style="height:200px">
+        <canvas id="c-ops-esteira" role="img" aria-label="Pizza: 13 API, 1 Plataforma em implantação ativa">13 API, 1 Plataforma.</canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Carga por CS responsável</div>
+      <div class="card-sub">Apenas registros com CS preenchido</div>
+      <div class="chart-wrap" style="height:200px">
+        <canvas id="c-cs" role="img" aria-label="Barras horizontais de carga por CS">Vinicius Bernardes: 1 escola. Carlos Junior: 0 nesta lista.</canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert-box">
+    ⚠ <div><strong>10 dos 14 registros ativos não têm data de fechamento de contrato preenchida.</strong> Isso impede calcular dias desde Won e identificar atrasos. Recomenda-se garantir o preenchimento desse campo no HubSpot no momento do Won para habilitar análise de capacidade.</div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PAINEL RITMO COMERCIAL
+═══════════════════════════════════════════════════ -->
+<div id="panel-ritmo" class="panel">
+
+  <p class="sec-label">Ritmo de fechamentos — Won por mês e esteira (jan/2025–jun/2026)</p>
+  <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Cada escola representa uma nova demanda de implantação para o time de Onboarding · referência: <code>data_fechamento_contrato</code></p>
+
+  <div class="card">
+    <div class="card-title">Contratos fechados por mês — separado por esteira</div>
+    <div class="card-sub">Plataforma (Educbank) · API Integração · Remessa e Retorno · Média geral das 3 esteiras no período</div>
+    <div class="legend">
+      <span class="leg"><span class="leg-dot" style="background:#185FA5"></span>Plataforma (Educbank)</span>
+      <span class="leg"><span class="leg-dot" style="background:#0F6E56"></span>API Integração</span>
+      <span class="leg"><span class="leg-dot" style="background:#BA7517"></span>Remessa e Retorno</span>
+    </div>
+    <div class="chart-wrap" style="height:260px">
+      <canvas id="c-ritmo" role="img" aria-label="Barras agrupadas de contratos fechados por mês e esteira de jan/25 a jun/26">Pico em outubro/2025 com 21 Plataforma, 10 API, 5 R&R.</canvas>
+    </div>
+  </div>
+
+  <div class="charts-3">
+    <div class="card">
+      <div class="card-title">Plataforma (Educbank)</div>
+      <div class="card-sub">Won mensais + SLA médio = 44 dias até 1º repasse</div>
+      <div class="chart-wrap" style="height:160px">
+        <canvas id="c-ritmo-educ" role="img" aria-label="Linha Plataforma por mês">Pico out/25 com 21 fechamentos.</canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">API Integração</div>
+      <div class="card-sub">Won mensais + SLA médio = 45 dias até 1º repasse</div>
+      <div class="chart-wrap" style="height:160px">
+        <canvas id="c-ritmo-api" role="img" aria-label="Linha API por mês">Pico mar/25 e out/25 com 9-10 fechamentos.</canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Remessa e Retorno</div>
+      <div class="card-sub">Won mensais + SLA médio = 49 dias até 1º repasse</div>
+      <div class="chart-wrap" style="height:160px">
+        <canvas id="c-ritmo-rr" role="img" aria-label="Linha R&R por mês">Pico jul/25 com 5 fechamentos.</canvas>
+      </div>
+    </div>
+  </div>
+
+  <p class="sec-label">Resumo de capacidade — média de fechamentos por esteira</p>
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">Plataforma — média mensal</div>
+      <div class="kpi-val">8</div>
+      <div class="kpi-sub">contratos/mês em média no período</div>
+      <span class="badge b-info">~44 dias p/ ativar cada</span>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">API — média mensal</div>
+      <div class="kpi-val">5</div>
+      <div class="kpi-sub">contratos/mês em média no período</div>
+      <span class="badge b-warn">~45 dias p/ ativar · outliers longos</span>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">R&R — média mensal</div>
+      <div class="kpi-val">3</div>
+      <div class="kpi-sub">contratos/mês em média no período</div>
+      <span class="badge b-info">~49 dias p/ ativar cada</span>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Total médio mensal (3 esteiras)</div>
+      <div class="kpi-val">16</div>
+      <div class="kpi-sub">novos contratos/mês em média</div>
+      <span class="badge b-gray">~45 dias p/ 1º repasse</span>
+    </div>
+  </div>
+
+  <div class="alert-box">
+    ⚠ <div><strong>Análise de capacidade pendente de dados.</strong> Quando o campo "Data de início da operação" (preenchido por vendas) chegar na camada ouro, será possível calcular: (1) gap entre data prometida por vendas e data real do primeiro repasse, por esteira; (2) backlog previsto do time de Onboarding nos próximos 30/60/90 dias; (3) meses em que o ritmo comercial supera a capacidade de implantação.</div>
+  </div>
+
+</div>
+</main>
+
+<footer>
+  Fonte: <strong>educ_one_ouro.clientes.obt_escolas_onboarding</strong> · Databricks · T+1 · Referência junho 2026 · Atualização manual
+</footer>
+
+<script>
+const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
+const GRID = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+const TICK = isDark ? '#888' : '#666';
+const BLUE='#185FA5', GREEN='#0F6E56', AMBER='#BA7517', RED='#A32D2D', GRAY='#888780';
+const BORD = isDark ? '#141413' : '#ffffff';
+
+function switchTab(id, btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+/* ── C-SLA-BAR: média vs mediana por esteira ── */
+new Chart(document.getElementById('c-sla-bar'),{
+  type:'bar',
+  data:{
+    labels:['Plataforma (Educbank)','API Integração','Remessa e Retorno','Média geral'],
+    datasets:[
+      {label:'Média',data:[44,45,49,45],backgroundColor:[BLUE,GREEN,AMBER,GRAY],borderWidth:0},
+      {label:'Mediana',data:[38,36,39,38],backgroundColor:[BLUE+'55',GREEN+'55',AMBER+'55',GRAY+'55'],borderWidth:0}
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:i=>i.dataset.label+': '+i.raw+' dias'}}},
+    scales:{
+      x:{ticks:{color:TICK,font:{size:11}},grid:{display:false}},
+      y:{min:0,max:60,ticks:{color:TICK,font:{size:10},callback:v=>v+'d'},grid:{color:GRID}}
+    }
+  }
+});
+
+/* ── C-FASES: donut ── */
+new Chart(document.getElementById('c-fases'),{
+  type:'doughnut',
+  data:{
+    labels:['Integração Concluída','Fase de Adoção','Implantação ativa','Churn'],
+    datasets:[{data:[811,70,14,13],backgroundColor:[BLUE,GREEN,AMBER,RED],borderColor:BORD,borderWidth:2}]
+  },
+  options:{responsive:true,maintainAspectRatio:false,cutout:'65%',
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:i=>' '+i.label+': '+i.raw}}}}
+});
+
+/* ── TABELA implantações ativas ── */
+const ativas=[
+  {n:'Colégio Pégasus Pederneiras',m:'Educbank',won:'27/05/2026',ini:'27/05/2026',dias:12,etapa:'Migração de dados - Parte I',cs:'—'},
+  {n:'Rede Daltro Educacional Recreio',m:'API',won:'18/05/2026',ini:'18/05/2026',dias:21,etapa:'Geração de token e envio ao ERP',cs:'—'},
+  {n:'Instituto Resolve De Ensino Ltda',m:'API',won:'04/05/2026',ini:'04/05/2026',dias:35,etapa:'Geração de token e envio ao ERP',cs:'—'},
+  {n:'Colégio Pequeno Einstein',m:'API',won:'15/10/2025',ini:'15/10/2025',dias:236,etapa:'Criação ambiente plataforma',cs:'—'},
+  {n:'Colégio Araújo Rocha',m:'API',won:'—',ini:'—',dias:null,etapa:'Criação ambiente plataforma',cs:'Vinicius Bernardes'},
+  {n:'Instituto Resolve Carmo',m:'API',won:'—',ini:'—',dias:null,etapa:'Geração de token e envio ao ERP',cs:'—'},
+  {n:'Instituto Resolve Cordeiro',m:'API',won:'—',ini:'—',dias:null,etapa:'Geração de token e envio ao ERP',cs:'—'},
+  {n:'Instituto Resolve Pássaro Azul',m:'API',won:'—',ini:'—',dias:null,etapa:'Geração de token e envio ao ERP',cs:'—'},
+  {n:'Instituto Resolve Bonsucesso',m:'API',won:'—',ini:'—',dias:null,etapa:'Geração de token e envio ao ERP',cs:'—'},
+  {n:'Instituto Resolve Bom Jardim',m:'API',won:'—',ini:'—',dias:null,etapa:'Geração de token e envio ao ERP',cs:'—'},
+  {n:'Instituto Resolve Nova Friburgo',m:'API',won:'—',ini:'—',dias:null,etapa:'Geração de token e envio ao ERP',cs:'—'},
+  {n:'Instituto Resolve Rio Das Ostras',m:'API',won:'—',ini:'—',dias:null,etapa:'Geração de token e envio ao ERP',cs:'—'},
+  {n:'Instituto Resolve Cachoeiras de Macacu',m:'API',won:'—',ini:'—',dias:null,etapa:'Geração de token e envio ao ERP',cs:'—'},
+  {n:'Rede Daltro Educacional Méier',m:'API',won:'—',ini:'—',dias:null,etapa:'Geração de token e envio ao ERP',cs:'—'},
+];
+const metodoCor={Educbank:BLUE,API:GREEN,'R&R':AMBER};
+const metodoBadge={Educbank:'b-info',API:'b-success','R&R':'b-warn'};
+const tb=document.querySelector('#tb-ativas tbody');
+ativas.forEach(r=>{
+  const diasVal=r.dias===null?null:r.dias;
+  const sit=diasVal===null?'b-gray':diasVal>180?'b-danger':diasVal>90?'b-warn':'b-success';
+  const sitTxt=diasVal===null?'Sem data Won':diasVal>180?'Crítico (>180d)':diasVal>90?'Atenção (>90d)':'Normal';
+  const diasTxt=diasVal===null?'—':diasVal+'d';
+  const tr=document.createElement('tr');
+  tr.innerHTML=`
+    <td style="font-weight:500">${r.n}</td>
+    <td><span class="pill ${metodoBadge[r.m]||'b-gray'}">${r.m}</span></td>
+    <td style="color:var(--text2)">${r.won}</td>
+    <td style="color:var(--text2)">${r.ini}</td>
+    <td><span class="dias-badge ${sit}">${diasTxt}</span></td>
+    <td style="color:var(--text2);font-size:11px">${r.etapa}</td>
+    <td style="color:var(--text2)">${r.cs}</td>
+    <td><span class="badge ${sit}">${sitTxt}</span></td>`;
+  tb.appendChild(tr);
+});
+
+/* ── C-OPS-ESTEIRA: pizza ── */
+new Chart(document.getElementById('c-ops-esteira'),{
+  type:'doughnut',
+  data:{
+    labels:['API Integração','Plataforma (Educbank)'],
+    datasets:[{data:[13,1],backgroundColor:[GREEN,BLUE],borderColor:BORD,borderWidth:2}]
+  },
+  options:{responsive:true,maintainAspectRatio:false,cutout:'60%',
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:i=>' '+i.label+': '+i.raw}}}}
+});
+
+/* ── C-CS: barras CS ── */
+new Chart(document.getElementById('c-cs'),{
+  type:'bar',
+  data:{
+    labels:['Vinicius Bernardes','(sem CS atribuído)'],
+    datasets:[{data:[1,13],backgroundColor:[BLUE,GRAY+'88'],borderWidth:0}]
+  },
+  options:{
+    indexAxis:'y',responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:i=>' '+i.raw+' escola(s)'}}},
+    scales:{
+      x:{ticks:{color:TICK,font:{size:10},stepSize:1},grid:{color:GRID}},
+      y:{ticks:{color:TICK,font:{size:11}},grid:{display:false}}
+    }
+  }
+});
+
+/* ── DADOS RITMO ── */
+const months=['Jan/25','Fev/25','Mar/25','Abr/25','Mai/25','Jun/25','Jul/25','Ago/25','Set/25','Out/25','Nov/25','Dez/25','Jan/26','Fev/26','Mar/26','Abr/26','Mai/26'];
+const dEduc=[11,2,4,1,4,8,7,10,8,21,16,8,4,5,5,15,6];
+const dAPI=[1,7,9,2,1,5,2,3,9,10,3,5,1,3,0,0,4];
+const dRR=[0,0,2,1,2,0,5,3,4,5,3,3,6,1,3,1,0];
+
+/* ── C-RITMO: barras agrupadas ── */
+new Chart(document.getElementById('c-ritmo'),{
+  type:'bar',
+  data:{
+    labels:months,
+    datasets:[
+      {label:'Plataforma',data:dEduc,backgroundColor:BLUE+'cc',borderWidth:0},
+      {label:'API',data:dAPI,backgroundColor:GREEN+'cc',borderWidth:0},
+      {label:'R&R',data:dRR,backgroundColor:AMBER+'cc',borderWidth:0}
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{mode:'index'}},
+    scales:{
+      x:{ticks:{color:TICK,font:{size:9},autoSkip:false,maxRotation:45},grid:{display:false}},
+      y:{ticks:{color:TICK,font:{size:10}},grid:{color:GRID}}
+    }
+  }
+});
+
+/* ── C-RITMO-EDUC / API / RR: linhas individuais ── */
+[
+  {id:'c-ritmo-educ',data:dEduc,color:BLUE},
+  {id:'c-ritmo-api',data:dAPI,color:GREEN},
+  {id:'c-ritmo-rr',data:dRR,color:AMBER}
+].forEach(cfg=>{
+  new Chart(document.getElementById(cfg.id),{
+    type:'line',
+    data:{
+      labels:months,
+      datasets:[{data:cfg.data,borderColor:cfg.color,backgroundColor:cfg.color+'18',fill:true,borderWidth:2,pointRadius:3,tension:.3}]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:i=>' '+i.raw+' contratos'}}},
+      scales:{
+        x:{ticks:{color:TICK,font:{size:8},autoSkip:true,maxRotation:45},grid:{display:false}},
+        y:{min:0,ticks:{color:TICK,font:{size:10},stepSize:5},grid:{color:GRID}}
+      }
+    }
+  });
+});
+</script>
+</body>
+</html>
