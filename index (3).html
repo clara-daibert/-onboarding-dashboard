@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Onboarding · Educbank</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{
+  --bg:#f5f4f0;--surface:#fff;--surface2:#f0efe9;--border:rgba(0,0,0,.09);
+  --text:#1a1a18;--text2:#5f5e5a;--text3:#888780;
+  --blue:#185FA5;--green:#0F6E56;--amber:#BA7517;--red:#A32D2D;--gray:#888780;
+  --ib:#E6F1FB;--it:#0C447C;--sb:#EAF3DE;--st:#3B6D11;
+  --wb:#FAEEDA;--wt:#854F0B;--db:#FCEBEB;--dt:#A32D2D;
+  --r:8px;--rl:12px;--grid:rgba(0,0,0,.06);--tick:#777;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#141413;--surface:#1e1e1c;--surface2:#252523;--border:rgba(255,255,255,.09);
+  --text:#e8e7e2;--text2:#aaa9a3;--text3:#666460;
+  --ib:#0c2d4a;--it:#85B7EB;--sb:#0d2e22;--st:#5DCAA5;
+  --wb:#3a2508;--wt:#FAC775;--db:#2e1010;--dt:#F09595;
+  --grid:rgba(255,255,255,.07);--tick:#888;
+}}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+.topbar{background:var(--surface);border-bottom:.5px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:10}
+.logo{display:flex;align-items:center;gap:10px}
+.lmark{width:28px;height:28px;border-radius:6px;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff}
+.lname{font-size:14px;font-weight:500}
+.lsub{font-size:11px;color:var(--text3)}
+.spill{font-size:10px;padding:3px 9px;border-radius:10px;background:var(--sb);color:var(--st);font-weight:500}
+.tabs{display:flex;gap:2px;background:var(--surface2);border-radius:var(--r);padding:3px}
+.tab{padding:5px 16px;border-radius:6px;border:none;background:transparent;color:var(--text2);font-size:12px;cursor:pointer;font-family:inherit;font-weight:500;transition:background .15s,color .15s}
+.tab.active{background:var(--surface);color:var(--text)}
+.main{max-width:1100px;margin:0 auto;padding:1.5rem 2rem 4rem}
+.panel{display:none}.panel.active{display:block}
+.sl{font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem;margin-top:1.5rem}
+.sl:first-child{margin-top:0}
+.note{font-size:11px;color:var(--text2);margin-bottom:12px;font-family:monospace}
+.kg{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem}
+.kpi{background:var(--surface2);border-radius:var(--r);padding:.875rem 1rem}
+.kl{font-size:11px;color:var(--text2);margin-bottom:4px}
+.kv{font-size:26px;font-weight:500;color:var(--text);line-height:1}
+.ks{font-size:11px;color:var(--text3);margin-top:3px}
+.badge{display:inline-block;font-size:10px;font-weight:500;padding:2px 8px;border-radius:4px;margin-top:6px}
+.bi{background:var(--ib);color:var(--it)}
+.bs{background:var(--sb);color:var(--st)}
+.bw{background:var(--wb);color:var(--wt)}
+.bd{background:var(--db);color:var(--dt)}
+.bg{background:var(--surface2);color:var(--text2);border:.5px solid var(--border)}
+.c2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.25rem}
+.c3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:1.25rem}
+.card{background:var(--surface);border:.5px solid var(--border);border-radius:var(--rl);padding:1.125rem 1.25rem;margin-bottom:1.25rem}
+.ct{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px}
+.csub{font-size:11px;color:var(--text3);margin-bottom:12px}
+.leg{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px}
+.li{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)}
+.ld{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.cw{position:relative;width:100%}
+.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.25rem}
+.sc{text-align:center;padding:1rem;background:var(--surface2);border-radius:var(--r)}
+.sc.hl{background:var(--surface);border:.5px solid var(--border)}
+.sn{font-size:30px;font-weight:500;line-height:1;margin:6px 0 3px}
+.slb{font-size:11px;color:var(--text2);margin-bottom:2px}
+.ss{font-size:10px;color:var(--text3)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{font-size:11px;font-weight:500;color:var(--text2);text-align:left;padding:6px 8px;border-bottom:.5px solid var(--border)}
+td{padding:7px 8px;border-bottom:.5px solid var(--border);color:var(--text);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.pill{display:inline-flex;align-items:center;font-size:10px;padding:2px 8px;border-radius:10px}
+.db2{display:inline-block;font-size:11px;font-weight:500;padding:2px 8px;border-radius:4px;text-align:center}
+.abox{background:var(--wb);border:.5px solid var(--amber);border-radius:var(--r);padding:.75rem 1rem;font-size:12px;color:var(--wt);margin-bottom:1.25rem;display:flex;gap:8px;align-items:flex-start}
+footer{text-align:center;font-size:11px;color:var(--text3);padding:2rem 0 1rem;border-top:.5px solid var(--border);margin-top:2rem}
+@media(max-width:768px){
+  .kg,.c2,.c3,.sgrid{grid-template-columns:repeat(2,1fr)}
+  .main{padding:1rem}.topbar{padding:0 1rem;flex-wrap:wrap;height:auto;gap:8px;padding:8px 1rem}
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="logo">
+    <div class="lmark">E</div>
+    <div>
+      <div class="lname">Onboarding · Capacidade Operacional</div>
+      <div class="lsub">educ_one_ouro · clientes · obt_escolas_onboarding · referência jun/2026</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <span class="spill">Databricks T+1</span>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('exec',this)">Executivo</button>
+      <button class="tab" onclick="switchTab('ops',this)">Operacional</button>
+      <button class="tab" onclick="switchTab('ritmo',this)">Ritmo comercial</button>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+
+<!-- ══════════════ EXECUTIVO ══════════════ -->
+<div id="panel-exec" class="panel active">
+
+  <p class="sl">Snapshot operacional — junho 2026</p>
+  <div class="kg">
+    <div class="kpi"><div class="kl">Implantação ativa</div><div class="kv">17</div><div class="ks">escolas em processo agora</div><span class="badge bi">Fase de Implantação</span></div>
+    <div class="kpi"><div class="kl">Fase de Adoção</div><div class="kv">70</div><div class="ks">pós-implantação, em treinamento</div><span class="badge bw">Adoção em curso</span></div>
+    <div class="kpi"><div class="kl">Integração concluída</div><div class="kv">811</div><div class="ks">escolas operando na plataforma</div><span class="badge bs">Base ativa</span></div>
+    <div class="kpi"><div class="kl">Base histórica (Won→repasse)</div><div class="kv">727</div><div class="ks">escolas com dados completos</div><span class="badge bg">Referência confiável</span></div>
+  </div>
+
+  <p class="sl">Tempo real de implantação — Won → primeiro repasse (dias)</p>
+  <p class="note">Métrica: DATEDIFF(primeira_boletagem_plataforma, data_fechamento_contrato) · 727 escolas · exclui sla_onboarding_dias (= tempo de vida do contrato)</p>
+
+  <div class="sgrid">
+    <div class="sc">
+      <div class="slb">Plataforma (Educbank)</div>
+      <div class="sn" style="color:var(--blue)">44</div>
+      <div class="ss">dias — média</div>
+      <div class="ss">mediana 38 · mín 6 · máx 199</div>
+      <span class="badge bs" style="margin-top:6px">374 escolas</span>
+    </div>
+    <div class="sc">
+      <div class="slb">API Integração</div>
+      <div class="sn" style="color:var(--green)">44</div>
+      <div class="ss">dias — média</div>
+      <div class="ss">mediana 36 · mín 4 · máx 596</div>
+      <span class="badge bw" style="margin-top:6px">222 escolas · outliers até 596d</span>
+    </div>
+    <div class="sc">
+      <div class="slb">Remessa e Retorno</div>
+      <div class="sn" style="color:var(--amber)">49</div>
+      <div class="ss">dias — média</div>
+      <div class="ss">mediana 39 · mín 1 · máx 311</div>
+      <span class="badge bi" style="margin-top:6px">131 escolas</span>
+    </div>
+    <div class="sc hl">
+      <div class="slb">Média geral (3 esteiras)</div>
+      <div class="sn" style="color:var(--text)">45</div>
+      <div class="ss">dias — média</div>
+      <div class="ss">mediana 38 · 727 escolas</div>
+      <span class="badge bg" style="margin-top:6px">Referência operacional</span>
+    </div>
+  </div>
+
+  <div class="c2">
+    <div class="card">
+      <div class="ct">Média vs mediana por esteira</div>
+      <div class="csub">Mediana é o indicador mais representativo — média é puxada por outliers</div>
+      <div class="leg">
+        <span class="li"><span class="ld" style="background:#185FA5"></span>Média</span>
+        <span class="li"><span class="ld" style="background:#185FA555"></span>Mediana</span>
+      </div>
+      <div class="cw" style="height:200px"><canvas id="c-sla"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ct">Distribuição por fase — jun/2026</div>
+      <div class="csub">17 implantações ativas (excluindo churns e concluídos mal classificados)</div>
+      <div class="leg">
+        <span class="li"><span class="ld" style="background:#185FA5"></span>Integração Concluída (811)</span>
+        <span class="li"><span class="ld" style="background:#0F6E56"></span>Fase de Adoção (70)</span>
+        <span class="li"><span class="ld" style="background:#BA7517"></span>Implantação ativa (17)</span>
+        <span class="li"><span class="ld" style="background:#A32D2D"></span>Churn (13)</span>
+      </div>
+      <div class="cw" style="height:200px"><canvas id="c-fases"></canvas></div>
+    </div>
+  </div>
+
+  <div class="abox">⚠ <div><strong>Campo "Data de início da operação" (preenchido por Vendas) ainda não disponível na camada ouro.</strong> Quando chegar, será possível calcular o gap Won → data prometida vs. data real do primeiro repasse por esteira, habilitando o check de aderência comercial.</div></div>
+
+</div>
+
+<!-- ══════════════ OPERACIONAL ══════════════ -->
+<div id="panel-ops" class="panel">
+
+  <p class="sl">Implantações ativas — junho 2026 · 17 escolas</p>
+  <p class="note">Filtro: fase = 'Fase de Implantação' excluindo status com Churn ou Concluído · dias = DATEDIFF(10/jun/2026, data_fechamento_contrato)</p>
+
+  <div class="kg">
+    <div class="kpi"><div class="kl">Esteira Plataforma</div><div class="kv">2</div><div class="ks">escolas ativas</div><span class="badge bi">12% do total</span></div>
+    <div class="kpi"><div class="kl">Esteira API</div><div class="kv">14</div><div class="ks">escolas ativas</div><span class="badge bw">82% do total</span></div>
+    <div class="kpi"><div class="kl">Esteira R&R</div><div class="kv">1</div><div class="ks">escola ativa</div><span class="badge bi">6% do total</span></div>
+    <div class="kpi"><div class="kl">Sem data de Won</div><div class="kv">10</div><div class="ks">registros sem data de fechamento</div><span class="badge bd">Qualidade de dados</span></div>
+  </div>
+
+  <div class="card">
+    <div class="ct">Lista completa — implantações ativas (jun/2026)</div>
+    <div class="csub">Ordenado por Won mais recente · dias calculados a partir de data_fechamento_contrato · referência 10/jun/2026</div>
+    <div style="overflow-x:auto">
+      <table id="tb-ativas"><thead><tr>
+        <th>Escola</th><th>Esteira</th><th>Won</th><th>Início onboarding</th><th>Dias desde Won</th><th>Etapa atual</th><th>CS</th><th>Situação</th>
+      </tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+
+  <div class="c2">
+    <div class="card">
+      <div class="ct">Implantações ativas por esteira</div>
+      <div class="leg">
+        <span class="li"><span class="ld" style="background:#0F6E56"></span>API (82%)</span>
+        <span class="li"><span class="ld" style="background:#185FA5"></span>Plataforma (12%)</span>
+        <span class="li"><span class="ld" style="background:#BA7517"></span>R&R (6%)</span>
+      </div>
+      <div class="cw" style="height:200px"><canvas id="c-ops-est"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ct">CS responsável — implantações ativas</div>
+      <div class="csub">Apenas registros com CS preenchido (1 de 17)</div>
+      <div class="cw" style="height:200px"><canvas id="c-cs"></canvas></div>
+    </div>
+  </div>
+
+  <div class="abox">⚠ <div><strong>10 dos 17 registros ativos sem data de Won no Databricks.</strong> Sem essa data não é possível calcular tempo em aberto nem identificar atrasos. Verificar preenchimento do campo data_fechamento_contrato no pipeline ETL.</div></div>
+
+</div>
+
+<!-- ══════════════ RITMO COMERCIAL ══════════════ -->
+<div id="panel-ritmo" class="panel">
+
+  <p class="sl">Ritmo de fechamentos — Won por mês e esteira (jan/2025–mai/2026)</p>
+  <p class="note">Cada escola = 1 nova demanda de implantação para o time de Onboarding · referência: data_fechamento_contrato</p>
+
+  <div class="card">
+    <div class="ct">Contratos fechados por mês — separado por esteira</div>
+    <div class="csub">Plataforma (Educbank) · API Integração · Remessa e Retorno · Pico: out/25 com 36 contratos (21+10+5)</div>
+    <div class="leg">
+      <span class="li"><span class="ld" style="background:#185FA5"></span>Plataforma (Educbank)</span>
+      <span class="li"><span class="ld" style="background:#0F6E56"></span>API Integração</span>
+      <span class="li"><span class="ld" style="background:#BA7517"></span>Remessa e Retorno</span>
+    </div>
+    <div class="cw" style="height:260px"><canvas id="c-ritmo"></canvas></div>
+  </div>
+
+  <div class="c3">
+    <div class="card">
+      <div class="ct">Plataforma (Educbank)</div>
+      <div class="csub">SLA médio Won→repasse: 44 dias</div>
+      <div class="cw" style="height:160px"><canvas id="c-educ"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ct">API Integração</div>
+      <div class="csub">SLA médio Won→repasse: 44 dias · outliers até 596d</div>
+      <div class="cw" style="height:160px"><canvas id="c-api"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ct">Remessa e Retorno</div>
+      <div class="csub">SLA médio Won→repasse: 49 dias</div>
+      <div class="cw" style="height:160px"><canvas id="c-rr"></canvas></div>
+    </div>
+  </div>
+
+  <p class="sl">Capacidade média necessária por esteira</p>
+  <div class="kg">
+    <div class="kpi"><div class="kl">Plataforma — média mensal</div><div class="kv">8</div><div class="ks">contratos/mês no período</div><span class="badge bi">~44 dias p/ ativar</span></div>
+    <div class="kpi"><div class="kl">API — média mensal</div><div class="kv">4</div><div class="ks">contratos/mês no período</div><span class="badge bw">~44 dias · outliers longos</span></div>
+    <div class="kpi"><div class="kl">R&R — média mensal</div><div class="kv">3</div><div class="ks">contratos/mês no período</div><span class="badge bi">~49 dias p/ ativar</span></div>
+    <div class="kpi"><div class="kpi" style="padding:0;background:none"><div class="kl">Total médio mensal (3 esteiras)</div><div class="kv">15</div><div class="ks">novos contratos/mês em média</div><span class="badge bg">~45 dias p/ 1º repasse</span></div></div>
+  </div>
+
+  <div class="abox">⚠ <div><strong>Análise de capacidade futura pendente.</strong> Quando o campo "Data de início da operação" chegar na camada ouro: (1) gap entre data prometida por Vendas e repasse real por esteira; (2) backlog previsto nos próximos 30/60/90 dias; (3) meses em que ritmo comercial supera capacidade de implantação.</div></div>
+
+</div>
+</main>
+
+<footer>Fonte: <strong>educ_one_ouro.clientes.obt_escolas_onboarding</strong> · Databricks · T+1 · Referência junho 2026 · Atualização manual</footer>
+
+<script>
+const D=matchMedia('(prefers-color-scheme:dark)').matches;
+const G=D?'rgba(255,255,255,.07)':'rgba(0,0,0,.06)',T=D?'#888':'#666',B=D?'#1e1e1c':'#fff';
+const BL='#185FA5',GR='#0F6E56',AM='#BA7517',RD='#A32D2D',GY='#888780';
+
+function switchTab(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+/* SLA barras */
+new Chart(document.getElementById('c-sla'),{type:'bar',data:{
+  labels:['Plataforma','API','R&R','Geral'],
+  datasets:[
+    {label:'Média',data:[44,44,49,45],backgroundColor:[BL,GR,AM,GY],borderWidth:0},
+    {label:'Mediana',data:[38,36,39,38],backgroundColor:[BL+'55',GR+'55',AM+'55',GY+'55'],borderWidth:0}
+  ]},options:{responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{display:false},tooltip:{callbacks:{label:i=>i.dataset.label+': '+i.raw+'d'}}},
+  scales:{x:{ticks:{color:T,font:{size:11}},grid:{display:false}},y:{min:0,max:65,ticks:{color:T,font:{size:10},callback:v=>v+'d'},grid:{color:G}}}}
+});
+
+/* Donut fases */
+new Chart(document.getElementById('c-fases'),{type:'doughnut',data:{
+  labels:['Integração Concluída','Fase de Adoção','Implantação ativa','Churn'],
+  datasets:[{data:[811,70,17,13],backgroundColor:[BL,GR,AM,RD],borderColor:B,borderWidth:2}]},
+  options:{responsive:true,maintainAspectRatio:false,cutout:'65%',
+  plugins:{legend:{display:false},tooltip:{callbacks:{label:i=>' '+i.label+': '+i.raw}}}}
+});
+
+/* Tabela implantações ativas */
+const REF=new Date('2026-06-10');
+const ativas=[
+  {n:'Colégio Knowledge Barra Funda',m:'Educbank',won:'2026-05-30',ini:'2026-05-30',etapa:'Envio da planilha de matrículas (Plataforma)',cs:'—'},
+  {n:'Colégio Interativo Mogi',m:'R&R',won:'2026-05-29',ini:'2026-05-29',etapa:'Contato com ERP (R&R)',cs:'—'},
+  {n:'Escolinha Tom E Jerry',m:'API',won:'2026-05-29',ini:'2026-05-29',etapa:'Geração de token e envio ao ERP (API)',cs:'—'},
+  {n:'Colégio Pégasus Pederneiras',m:'Educbank',won:'2026-05-27',ini:'2026-05-27',etapa:'Migração de dados - Parte I (Plataforma)',cs:'—'},
+  {n:'Rede Daltro Educacional Recreio',m:'API',won:'2026-05-18',ini:'2026-05-18',etapa:'Geração de token e envio ao ERP (API)',cs:'—'},
+  {n:'Instituto Resolve De Ensino Ltda',m:'API',won:'2026-05-04',ini:'2026-05-04',etapa:'Geração de token e envio ao ERP (API)',cs:'—'},
+  {n:'Colégio Pequeno Einstein',m:'API',won:'2025-10-15',ini:'2025-10-15',etapa:'Criação ambiente plataforma (API)',cs:'—'},
+  {n:'Colégio Araújo Rocha',m:'API',won:null,ini:null,etapa:'Criação ambiente plataforma (API)',cs:'—'},
+  {n:'Instituto Resolve Cordeiro',m:'API',won:null,ini:null,etapa:'Geração de token e envio ao ERP (API)',cs:'—'},
+  {n:'Instituto Resolve Bom Jardim',m:'API',won:null,ini:null,etapa:'Geração de token e envio ao ERP (API)',cs:'—'},
+  {n:'Rede Daltro Educacional Méier',m:'API',won:null,ini:null,etapa:'Geração de token e envio ao ERP (API)',cs:'—'},
+  {n:'Instituto Resolve Carmo',m:'API',won:null,ini:null,etapa:'Geração de token e envio ao ERP (API)',cs:'—'},
+  {n:'Instituto Resolve Bonsucesso',m:'API',won:null,ini:null,etapa:'Geração de token e envio ao ERP (API)',cs:'—'},
+  {n:'Instituto Resolve Pássaro Azul',m:'API',won:null,ini:null,etapa:'Geração de token e envio ao ERP (API)',cs:'—'},
+  {n:'Instituto Resolve Nova Friburgo',m:'API',won:null,ini:null,etapa:'Geração de token e envio ao ERP (API)',cs:'—'},
+  {n:'Instituto Resolve Rio Das Ostras',m:'API',won:null,ini:null,etapa:'Geração de token e envio ao ERP (API)',cs:'—'},
+  {n:'Instituto Resolve Cachoeiras De Macacu',m:'API',won:null,ini:null,etapa:'Geração de token e envio ao ERP (API)',cs:'—'},
+];
+const mBadge={Educbank:'bi',API:'bs','R&R':'bw'};
+const tb=document.querySelector('#tb-ativas tbody');
+ativas.forEach(r=>{
+  const dias=r.won?Math.round((REF-new Date(r.won))/86400000):null;
+  const sit=dias===null?'bg':dias>180?'bd':dias>90?'bw':'bs';
+  const sitT=dias===null?'Sem data Won':dias>180?'Crítico +180d':dias>90?'Atenção +90d':'Normal';
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td style="font-weight:500">${r.n}</td>
+    <td><span class="pill ${mBadge[r.m]||'bg'}">${r.m}</span></td>
+    <td style="color:var(--text2)">${r.won||'—'}</td>
+    <td style="color:var(--text2)">${r.ini||'—'}</td>
+    <td><span class="db2 ${sit}">${dias!==null?dias+'d':'—'}</span></td>
+    <td style="color:var(--text2);font-size:11px">${r.etapa}</td>
+    <td style="color:var(--text2)">${r.cs}</td>
+    <td><span class="badge ${sit}">${sitT}</span></td>`;
+  tb.appendChild(tr);
+});
+
+/* Donut esteira ops */
+new Chart(document.getElementById('c-ops-est'),{type:'doughnut',data:{
+  labels:['API','Plataforma','R&R'],
+  datasets:[{data:[14,2,1],backgroundColor:[GR,BL,AM],borderColor:B,borderWidth:2}]},
+  options:{responsive:true,maintainAspectRatio:false,cutout:'60%',
+  plugins:{legend:{display:false},tooltip:{callbacks:{label:i=>' '+i.label+': '+i.raw}}}}
+});
+
+/* Barras CS */
+new Chart(document.getElementById('c-cs'),{type:'bar',data:{
+  labels:['(sem CS atribuído)','Vinicius Bernardes'],
+  datasets:[{data:[16,1],backgroundColor:[GY+'88',BL],borderWidth:0}]},
+  options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{display:false},tooltip:{callbacks:{label:i=>' '+i.raw+' escola(s)'}}},
+  scales:{x:{ticks:{color:T,font:{size:10},stepSize:1},grid:{color:G}},y:{ticks:{color:T,font:{size:11}},grid:{display:false}}}}
+});
+
+/* Dados ritmo */
+const MO=['Jan/25','Fev/25','Mar/25','Abr/25','Mai/25','Jun/25','Jul/25','Ago/25','Set/25','Out/25','Nov/25','Dez/25','Jan/26','Fev/26','Mar/26','Abr/26','Mai/26'];
+const dE=[11,2,4,1,4,8,7,10,8,21,16,8,4,5,5,15,7];
+const dA=[1,7,9,2,1,5,2,3,9,10,3,5,1,3,0,0,5];
+const dR=[0,0,2,1,2,0,5,3,4,5,3,3,6,1,3,1,1];
+
+new Chart(document.getElementById('c-ritmo'),{type:'bar',data:{
+  labels:MO,
+  datasets:[
+    {label:'Plataforma',data:dE,backgroundColor:BL+'cc',borderWidth:0},
+    {label:'API',data:dA,backgroundColor:GR+'cc',borderWidth:0},
+    {label:'R&R',data:dR,backgroundColor:AM+'cc',borderWidth:0}
+  ]},options:{responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{display:false},tooltip:{mode:'index'}},
+  scales:{x:{ticks:{color:T,font:{size:9},autoSkip:false,maxRotation:45},grid:{display:false}},y:{ticks:{color:T,font:{size:10}},grid:{color:G}}}}
+});
+
+[{id:'c-educ',d:dE,c:BL},{id:'c-api',d:dA,c:GR},{id:'c-rr',d:dR,c:AM}].forEach(cfg=>{
+  new Chart(document.getElementById(cfg.id),{type:'line',data:{
+    labels:MO,
+    datasets:[{data:cfg.d,borderColor:cfg.c,backgroundColor:cfg.c+'18',fill:true,borderWidth:2,pointRadius:3,tension:.3}]},
+    options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:i=>' '+i.raw+' contratos'}}},
+    scales:{x:{ticks:{color:T,font:{size:8},autoSkip:true,maxRotation:45},grid:{display:false}},y:{min:0,ticks:{color:T,font:{size:10},stepSize:5},grid:{color:G}}}}
+  });
+});
+</script>
+</body>
+</html>
